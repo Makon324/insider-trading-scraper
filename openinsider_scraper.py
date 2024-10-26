@@ -86,7 +86,6 @@ def worker(tickers):
 
     for ticker in tickers:
         rows = scrape_page(ticker)
-
         df = pd.concat([df, pd.DataFrame(rows, columns = columns)], ignore_index=True)  # adding rows about this ticker to df
 
     return df
