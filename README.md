@@ -1,15 +1,16 @@
 # openinsiderscraper
 
-This Python script is designed to scrape insider trading data from the openinsider website for a list of stock tickers. It handles scraping, data aggregation and saving the results to a CSV file.
+This Python script is designed to scrape insider trading data from the openinsider website for a list of stock tickers. It handles scraping, data aggregation and saving the results to a file.
 
 # How does it work
 
-The script scrapes data about the given tickers and appends any new rows (not yet scraped) to the CSV file.
+The script scrapes data about the given tickers and appends any new rows (not yet scraped) to the specified file.
 
 # Const parameters
 
 There are 3 const parameters that you should change freely.
-- `link` this is the link to CSV file
+- `link` this is the link to file, the extension could be any of the following: `.csv`, `.txt`, `.xlsx`, `.db`
+- `csv_sep   this is the separator in case link is either a `.csv` or `.txt`
 - `default_ticker_link` this is the link to file with default tickers to scrape if no other arguments are present
 - `num_processes` this is the default number of processes the scraper will run on
 
