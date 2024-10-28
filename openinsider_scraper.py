@@ -131,7 +131,6 @@ if __name__ == "__main__":
         else:
             print("unsuported database file format")
             exit()
-
     except:
         pass
 
