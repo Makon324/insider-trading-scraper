@@ -114,6 +114,8 @@ if __name__ == "__main__":
     else:  # if the argument list not empty and theres no -f option, use tickers from arguments
         tickers = sys.argv[1:]
 
+    tickers = [ticker.upper() for ticker in tickers]  # change all tickers to upper case characters
+
 
     while len(tickers) < 20 * num_processes and num_processes > 1:  # if the number of tickers is small use smaller number of threads
         num_processes //= 2
