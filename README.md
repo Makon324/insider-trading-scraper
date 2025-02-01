@@ -1,6 +1,6 @@
 # Insider Trading Data Scraper & Visualizer
 
-A Python-based tool to scrape insider trading data from **OpenInsider** and **SEC Form-4 filings**, then visualize it alongside stock price trends.
+A Python-based for scraping and visualizing insider trading data using SEC and openinsider website.
 
 ## Features
 
@@ -10,20 +10,7 @@ A Python-based tool to scrape insider trading data from **OpenInsider** and **SE
 - **Data Storage**: Supports CSV, Excel, TXT, and SQLite databases.
 - **Visualization**: Generates annotated stock price charts with insider trade details (purchases/sales) using `yfinance` and `seaborn`.
 - **Multi-Processing**: OpenInsider scraper uses multiprocessing for faster data collection.
-- **Customizable**: Configure file paths, date ranges, and data filters via CLI or `.env` file.
-
-## Installation
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/yourusername/insider-trading-analysis.git
-   cd insider-trading-analysis
-   ```
-
-2. **Install Dependencies**
-   ```bash
-   pip install pandas yfinance matplotlib seaborn requests beautifulsoup4 python-dotenv adjustText
-   ```
+- **Customizable**: Configure file paths, date ranges, and data filters via `.env` file.
 
 ## Usage
 
