@@ -1,4 +1,3 @@
-```markdown
 # Insider Trading Data Scraper & Visualizer
 
 A Python-based tool to scrape insider trading data from **OpenInsider** and **SEC Form-4 filings**, then visualize it alongside stock price trends.
