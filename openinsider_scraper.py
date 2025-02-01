@@ -1,39 +1,44 @@
 # file structure:
-# X; Filing Date; Trade Date; Ticker; Insider Name; Title; Trade Type; Price; Quantyty; Owned; DeltaOwn; Value; 1d; 1w; 1m; 6m;
+# X; Filing Date; Trade Date; Ticker; Insider Name; Title; Trade Type; Price; Quantity; Value;
 
-# -f  -  ticker list in file
-
-from bs4 import BeautifulSoup
-import requests
-import sys
 import pandas as pd
 import math
 import multiprocessing as mp
 from pathlib import Path
 import sqlite3
+import argparse
+import os
+from dotenv import load_dotenv
 
-columns = [  # dataframe column names
+columns = [  # openinsider column names
     'X', 'Filing Date', 'Trade Date', 'Ticker', 'Insider Name', 'Title', 'Trade Type',
     'Price', 'Qty', 'Owned', 'deltaOwn', 'Value',
     '1d', '1w', '1m', '6m'
 ]
 
+def str_to_bool(str):
+    if str == "True":
+        return True
+    return False
+
+## ENV VARIABLES ##
+
+load_dotenv()
+
 script_dir = Path(__file__).resolve().parent  # path to parent folder of the script
 
+link = script_dir / os.getenv("LINK", "scrapes.csv")  # link to file with scraped data - can be any of the following types: '.csv', '.txt', '.xlsx', '.db'
 
-## CONST VARIABLES, CHANGE FREELY ##
+csv_sep = os.getenv("CSV_SEP", ';')  # separator in case link is .csv or .txt file
 
-link = script_dir / "scrapes.csv"  # link to file with scraped data - can be any of the following types: '.csv', '.txt', '.xlsx', '.db'
+default_ticker_link = script_dir / os.getenv("TICKER_LINK", "default_tickers.txt")  # link to txt with default ticker list
 
-csv_sep = ','  # separator in case link is .csv or .txt file
+num_processes = int(os.getenv("NUM_PROCESSES", '4'))  # number of processes
 
-default_ticker_link = script_dir / "default_tickers.txt"  # link to txt with default ticker list
+remove_OE = str_to_bool(os.getenv("REMOVE_OE", "False"))
 
-num_processes = 4  # number of processes
 
 #######
-
-
 
 
 def Strip_array(vec):  # strips every ticker in an array from white characters
@@ -75,7 +80,7 @@ def scrape_page(ticker):
     table = HTML.find_all("tbody")[1]  # table in html
 
     rows = []  # data frame with data about this ticker
-    for row in table.find_all('tr')[1:]:  # Skip the header row
+    for row in table.find_all('tr'):
         cols = row.find_all('td')
         cols = [ele.text.strip() for ele in cols]
         rows.append(cols)
@@ -92,6 +97,19 @@ def worker(tickers):
         rows = scrape_page(ticker)
         df = pd.concat([df, pd.DataFrame(rows, columns = columns)], ignore_index=True)  # adding rows about this ticker to df
 
+    df = df.drop(['Owned', 'deltaOwn', '1d', '1w', '1m', '6m'], axis=1)  # drop columns with not usefoul rows
+
+    # Changing fields to better suit our needs
+    if csv_sep == ',':
+        df['Title'] = df['Title'].str.replace(',', ';')
+    elif csv_sep == ';':
+        df['Title'] = df['Title'].str.replace(';', ',')
+    df["Value"] = df["Value"].str.replace(r'[+$,]', '', regex=True)
+    df['Price'] = df['Price'].str.replace('$', '')
+    df['Qty'] = df['Qty'].str.replace(r'[+,]', '', regex=True)
+    if remove_OE == True:
+        df['Trade Type'] = df['Trade Type'].str.replace('+OE', '')
+
     return df
 
 
@@ -101,18 +119,24 @@ if __name__ == "__main__":
 
     tickers = []  # list with tickers to scrape
 
-    if len(sys.argv) == 1:  # if there are no arguments use tickers from default file
-        tickers = tickers_from_file(default_ticker_link)
+    parser = argparse.ArgumentParser(description="")
 
-    elif sys.argv[1] == '-f':  # if theres -f option use tickers in file after that option + all tickers after the path
-        if len(sys.argv) < 3:
-            print("no path after '-f'")
-            exit()
-        tickers = tickers_from_file(sys.argv[2])
-        tickers += sys.argv[3:]
+    # Add argparse options for -a, -b, -c (and similar options)
+    parser.add_argument('-f', type=str, help="Provide file with tickers")
+    parser.add_argument('-s', type=str, help="Provide file with scrapes")
+    parser.add_argument('-o', action='store_true', help="Remove +OE")
 
-    else:  # if the argument list not empty and theres no -f option, use tickers from arguments
-        tickers = sys.argv[1:]
+    # Use `parse_known_args()` to allow argparse to handle the first few arguments
+    args, unknown = parser.parse_known_args()
+
+    if args.f is not None:
+        tickers = tickers_from_file(args.f)
+    if args.s is not None:
+        link = args.s
+    if args.o:
+        remove_OE = True
+
+    tickers += unknown
 
     tickers = [ticker.upper() for ticker in tickers]  # change all tickers to upper case characters
 
@@ -121,12 +145,15 @@ if __name__ == "__main__":
         num_processes //= 2
 
     # read data already scraped in csv
-    df = pd.DataFrame(columns = columns)
+    df = pd.DataFrame(columns = [  # dataframe column names
+    'X', 'Filing Date', 'Trade Date', 'Ticker', 'Insider Name', 'Title', 'Trade Type',
+    'Price', 'Qty', 'Value'])
+
     try:
         if(link.suffix in ['.csv', '.txt']):
-            df = pd.read_csv(link, sep = csv_sep, low_memory=False)
+            df = pd.read_csv(link, sep = csv_sep, dtype=str, na_filter=False)
         elif(link.suffix == '.xlsx'):
-            df = pd.read_excel(link, index_col=0)
+            df = pd.read_excel(link, index_col=0, dtype=str, keep_default_na=False)
         elif(link.suffix == '.db'):
             conn = sqlite3.connect(link)
             df = pd.read_sql_query("SELECT * FROM people", conn)
@@ -144,9 +171,9 @@ if __name__ == "__main__":
         for result in results:
             df = pd.concat([df, result], ignore_index=False)
 
-    # drop duplicates, there might have been data already in csv that we scraped once again
-    df = df.drop_duplicates(subset = ['Filing Date', 'Trade Date', 'Ticker', 'Insider Name', 'Title', 'Trade Type',
-        'Price', 'Qty', 'Owned', 'deltaOwn', 'Value'])
+    # drop duplicates, there might have been data already in file that we scraped once again
+    df = df.drop_duplicates(subset = ['Filing Date', 'Trade Date', 'Ticker', 'Insider Name', 'Trade Type',
+        'Price', 'Qty', 'Value'])
 
     # save and print data
     if(link.suffix in ['.csv', '.txt']):
@@ -158,5 +185,6 @@ if __name__ == "__main__":
         df.to_sql('people', conn, if_exists='replace', index=False)
         conn.close()
     print(df)
+
 
 
