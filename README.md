@@ -105,13 +105,4 @@ python insider_data_visualizer.py AAPL -sd 2023-01-01 -ed 2023-12-31 -s scrapes.
 - **User Agent**: Set a valid `USER_AGENT` in `.env` to avoid blocking by the SEC.
 - **Data Cleaning**: Duplicate entries are automatically removed during scraping.
 
----
 
-## Contributing
-
-Pull requests are welcome! For major changes, open an issue first to discuss.
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
-```
