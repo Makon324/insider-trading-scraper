@@ -1,13 +1,13 @@
 # Insider Trading Data Scraper & Visualizer
 
-A Python-based for scraping and visualizing insider trading data using SEC and openinsider website.
+Python-based application for scraping and visualizing insider trading data using SEC and openinsider websites.
 
 ## Features
 
 - **Dual Scraping Sources**
   - **OpenInsider Scraper**: Fetches insider trading data from [openinsider.com](http://openinsider.com/).
   - **SEC Scraper**: Retrieves Form-4 filings from the SEC Edgar database.
-- **Data Storage**: Supports CSV, Excel, TXT, and SQLite databases.
+- **Data Storage**: Supports CSV, Excel, TXT, and SQLite database.
 - **Visualization**: Generates annotated stock price charts with insider trade details (purchases/sales) using `yfinance` and `seaborn`.
 - **Multi-Processing**: OpenInsider scraper uses multiprocessing for faster data collection.
 - **Customizable**: Configure file paths, date ranges, and data filters via `.env` file.
@@ -37,7 +37,7 @@ A Python-based for scraping and visualizing insider trading data using SEC and o
   - `-f`: Path to a `.txt` file containing tickers/CIKs.
   - `-s`: Output file.
   - `-d`: Disable combining adjacent trade dates.
-  - `-l`: Limit filings per ticker (e.g., `-l 10`).
+  - `-l`: Limit filings per ticker (e.g. `-l 10`).
 
 ### 2. Visualizing Data (`insider_data_visualizer.py`)
 Generate a stock price chart with insider trade annotations:
@@ -58,30 +58,17 @@ python insider_data_visualizer.py AAPL -sd 2023-01-01 -ed 2023-12-31 -s scrapes.
 
 1. **Environment Variables** (`.env`)
    ```ini
-   LINK=scrapes.csv       # Path to data file
-   CSV_SEP=;              # CSV separator
-   TICKER_LINK=tickers.txt # Default ticker list
-   NUM_PROCESSES=4        # OpenInsider multiprocessing
-   USER_AGENT=YourName/1.0 # SEC scraper user agent
-   SEC_BET_REQ=0.2        # SEC request delay (seconds)
+   LINK=scrapes.csv         # Path to file with scraped data
+   CSV_SEP=;                # CSV separator
+   TICKER_LINK=tickers.txt  # Default ticker list
+   NUM_PROCESSES=4          # OpenInsider multiprocessing
+   USER_AGENT=YourAgent/1.0 # SEC scraper user agent
+   SEC_BET_REQ=0.2          # SEC request delay (seconds)
    ```
 
 2. **File Formats**
-   - Use `.csv`, `.xlsx`, `.txt`, or `.db` (SQLite) for input/output.
-
----
-
-## Example Workflow
-
-1. **Scrape Data from OpenInsider**
-   ```bash
-   python openinsider_scraper.py TSLA -s scrapes.csv
-   ```
-
-2. **Visualize**
-   ```bash
-   python insider_data_visualizer.py TSLA -sd 2023-01-01 -s scrapes.csv
-   ```
+   - Use `.csv`, `.xlsx`, `.txt`, or `.db` (SQLite) for file with scraped data.
+   - Use `.txt` for file with tickers/CIKs.
 
 ---
 
