@@ -57,7 +57,7 @@ class SECScraper(BaseScraper):
         return list(set(ciks))  # Remove duplicates
 
     def _make_sec_request(self, url: str, retries: int = 3) -> requests.Response:
-        """Makes SEC request with rate limiting and retries"""
+        """Make SEC request with rate limiting and retries"""
         for attempt in range(retries):
             elapsed = (dt.datetime.now() - self.last_request_time).total_seconds()
             if elapsed < SEC_REQUEST_DELAY:
