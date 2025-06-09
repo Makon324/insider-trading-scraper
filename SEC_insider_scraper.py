@@ -367,7 +367,7 @@ def main():
         exit(1)
     finally:
         if scraper:
-            scraper.close()
+            scraper.close_session()
 
 
 if __name__ == "__main__":
